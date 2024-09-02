@@ -600,3 +600,28 @@ def get_file_size(request, file_id):
         })
     except UploadFile_summary.DoesNotExist:
         return JsonResponse({'error': '파일을 찾을 수 없습니다.'}, status=404)
+
+def extract_quiz(input_text):
+    pattern = r'^(.*?)\n\n(?:1\. (.*?)\n2\. (.*?)\n3\. (.*?)\n4\. (.*?)\n\n\[답: (\d+)\. (.*?)\]'
+
+# 정규 표현식에 맞춰 패턴 매칭
+    match = re.search(pattern, input_text, re.DOTALL)
+
+    if match:
+        question = match.group(1).strip()
+        options = [match.group(i).strip() for i in range(2, 6)]
+        answer_number = match.group(6).strip()
+        answer_explanation = match.group(7).strip()
+
+        print("문제 지문:")
+        print(question)
+        print("\n객관식:")
+        for i, option in enumerate(options, start=1):
+            print(f"{i}. {option}")
+        print(f"\n정답: {answer_number}. {answer_explanation}")
+        quiz_member = [question, options, answer_number, answer_explanation]
+
+        return quiz_member
+    else:
+        print("문제 형식이 올바르지 않습니다.")
+        return None
