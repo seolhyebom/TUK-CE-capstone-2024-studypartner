@@ -601,8 +601,8 @@ def get_file_size(request, file_id):
     except UploadFile_summary.DoesNotExist:
         return JsonResponse({'error': '파일을 찾을 수 없습니다.'}, status=404)
 
-def extract_quiz(input_text):
-    pattern = r'^(.*?)\n\n(?:1\. (.*?)\n2\. (.*?)\n3\. (.*?)\n4\. (.*?)\n\n\[답: (\d+)\. (.*?)\]'
+def extract_quiz(sys_message, user_message):
+    pattern = r'(.*?)\n\n(?:1)\. (.*?)\n2\. (.*?)\n3\. (.*?)\n4\. (.*?)\n\n\[답: (\d)\. (.*?)\]'
 
 # 정규 표현식에 맞춰 패턴 매칭
     match = re.search(pattern, input_text, re.DOTALL)
@@ -625,3 +625,20 @@ def extract_quiz(input_text):
     else:
         print("문제 형식이 올바르지 않습니다.")
         return None
+
+
+def show_quiz_view(request):
+    text = stt(audio_file.file_name.path)  # stt 함수는 정의된 곳에서 가져오기
+
+        if not text:
+            raise ValueError("STT 함수에서 텍스트를 반환하지 못했습니다.")
+
+        # 요약 생성
+        try:
+            quiz_submit = (
+                sys_message="""너는 요약을 수행하는 챗봇이야. 항상 한국어로 요약해. 핵심 내용만 256토큰 이내로 한국어로 요약해서 중괄호 안에 넣어줘""", 
+                user_message=text
+            )
+        except Exception as e:
+            raise ValueError(f"요약 생성 중 오류가 발생했습니다: {e}")
+    generate_response(sys_msg, )
