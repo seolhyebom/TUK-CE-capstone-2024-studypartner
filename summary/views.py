@@ -626,10 +626,12 @@ def extract_quiz(input_text):
 
         context = {
             'question': question,
-            'audio_file': audio_file
+            'options': options, 
+            'answer_number': answer_number, 
+            'answer_comment': answer_comment
         }
 
-        return None
+        return context
 
 
 def show_quiz_view(request):
@@ -654,5 +656,5 @@ def show_quiz_view(request):
         )
     except Exception as e:
         raise ValueError(f"요약 생성 중 오류가 발생했습니다: {e}")
-    extract_quiz(quiz_submit)
-    
+    quiz_list = extract_quiz(quiz_submit)
+    return render(request, 'summary/AI_quiz.html', quiz_list)
