@@ -768,3 +768,61 @@ def get_file_size(request, file_id):
         })
     except UploadFile_summary.DoesNotExist:
         return JsonResponse({'error': '파일을 찾을 수 없습니다.'}, status=404)
+
+
+def extract_quiz(input_text):
+    pattern = r'\[문제: (.*?)\]\n\n(?:1)\. (.*?)\n2\. (.*?)\n3\. (.*?)\n4\. (.*?)\n\n\[답: (\d)\. (.*?)\]'
+
+    # 정규 표현식에 맞춰 패턴 매칭
+    match = re.search(pattern, input_text)
+
+    if match:
+        question = match.group(1)
+        options = [match.group(i) for i in range(2, 6)]
+        answer_number = match.group(6)
+        answer_comment = match.group(7)
+
+        print(f"문제: {question}")
+        # print(question)
+        print("\n객관식:")
+        for i, option in enumerate(options, start=1):
+            print(f"{i}. {option}")
+        print(f"\n정답: {answer_number}")
+        print(f"\n해설: {answer_comment}")
+    else:
+        print("문제 형식이 올바르지 않습니다.")
+
+        context = {
+            'question': question,
+            'options': options, 
+            'answer_number': answer_number, 
+            'answer_comment': answer_comment
+        }
+
+        return context
+
+
+def show_quiz_view(request):
+    text = stt(audio_file.file_name.path)  # stt 함수는 정의된 곳에서 가져오기
+
+    if not text:
+        raise ValueError("STT 함수에서 텍스트를 반환하지 못했습니다.")
+
+    # 요약 생성
+    try:
+        quiz_submit = generate_response(
+            sys_message="""너는 한국어로 4지선다 객관식 문제를 제공하는 챗봇이야. 다음 형식대로 문제만 만들어줘:
+[문제: 문제 지문]
+
+1. 첫 번째 보기
+2. 두 번째 보기
+3. 세 번째 보기
+4. 네 번째 보기
+
+[답: 정답 번호. 정답 해설]""", 
+            user_message=text
+        )
+    except Exception as e:
+        raise ValueError(f"요약 생성 중 오류가 발생했습니다: {e}")
+    quiz_list = extract_quiz(quiz_submit)
+    return render(request, 'summary/AI_quizpage.html', quiz_list)
