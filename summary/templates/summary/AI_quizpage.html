@@ -216,9 +216,16 @@
                         </a>
                         <!-- 다운로드와 삭제 아이콘 오른쪽 정렬 -->
                         <div>
-                            <a href="#" class="link-effect2">
+                            <a href="{% url 'summary:show_quiz' file_id=file.id lecture_name=chapter.lecture.title chapter_name=chapter.chapter_name %}" class="link-effect2">
                                 Quiz 시작하기
                             </a>
+
+                            <div id="result" style="display: none;">
+                                <h3>결과:</h3>
+                                <p id="result-text"></p>
+                                <p id="answer-comment" style="display: none;">{{ answer_comment }}</p>
+                            </div>
+
                         </div>
                     </li>
                     {% endfor %} 
@@ -229,6 +236,20 @@
             <p class="tip-effect1">TIP1 : 내용을 입력하세요.</p>
             <p class="tip-effect2">TIP2 : 내용을 입력하세요.</p>
             <p class="tip-effect3">TIP3 : 내용을 입력하세요.</p>
+
+            <div style="color: white;">
+                <h2 style="padding-bottom: 20px;" class="tip-effect2">문제 : {{ quiz_list.question|default:"문제가 없습니다." }}</h2>
+
+                <ul>
+                    {% for option in quiz_list.options %}
+                        <li style="padding-bottom: 6px;">{{ forloop.counter }}. {{ option|default:"보기가 없습니다." }}</li>
+                    {% endfor %}
+                </ul><br>
+
+                <p style="padding-bottom: 3px;">정답 : {{ quiz_list.answer_number|default:"정답이 없습니다." }}</p>
+                <p>해설 : {{ quiz_list.answer_comment|default:"해설이 없습니다." }}</p>
+            </div>
+
         </div>
     </div>
     <!-- 사용자의 챕터 상세정보 끝부분-->
@@ -239,7 +260,6 @@
     </div>
     <!-- 친구 시스템 포함할 끝 부분-->
 
-    
 
 </body>
 </html>

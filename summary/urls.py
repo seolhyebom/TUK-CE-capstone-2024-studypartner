@@ -17,5 +17,6 @@ urlpatterns = [
     path('show_summary_view/<str:lecture_name>/<str:chapter_name>/<int:file_id>/', views.show_summary_view, name='show_summary_view'),
     path('get_file_size/<int:file_id>/', views.get_file_size, name='get_file_size'),
 
+    path('show_quiz/<int:file_id>/<str:lecture_name>/<str:chapter_name>/', views.show_quiz_view, name='show_quiz'),
 ]
 

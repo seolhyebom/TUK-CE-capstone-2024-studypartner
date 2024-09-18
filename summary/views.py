@@ -770,120 +770,152 @@ def get_file_size(request, file_id):
         return JsonResponse({'error': '파일을 찾을 수 없습니다.'}, status=404)
 
 
-def extract_quiz(input_text):
-    pattern = r'\[문제: (.*?)\]\n\n(?:1)\. (.*?)\n2\. (.*?)\n3\. (.*?)\n4\. (.*?)\n\n\[답: (\d)\. (.*?)\]'
-
-    # 정규 표현식에 맞춰 패턴 매칭
-    match = re.search(pattern, input_text)
-
-    if match:
-        question = match.group(1)
-        options = [match.group(i) for i in range(2, 6)]
-        answer_number = match.group(6)
-        answer_comment = match.group(7)
-
-        print(f"문제: {question}")
-        # print(question)
-        print("\n객관식:")
-        for i, option in enumerate(options, start=1):
-            print(f"{i}. {option}")
-        print(f"\n정답: {answer_number}")
-        print(f"\n해설: {answer_comment}")
-    else:
-        print("문제 형식이 올바르지 않습니다.")
-
-        context = {
-            'question': question,
-            'options': options, 
-            'answer_number': answer_number, 
-            'answer_comment': answer_comment
-        }
-
-        return context
 
 
-def show_quiz_view(request):
-    text = stt(audio_file.file_name.path)  # stt 함수는 정의된 곳에서 가져오기
 
-    if not text:
-        raise ValueError("STT 함수에서 텍스트를 반환하지 못했습니다.")
 
-    # 요약 생성
-    try:
-        quiz_submit = generate_response(
-            sys_message="""너는 한국어로 4지선다 객관식 문제를 제공하는 챗봇이야. 다음 형식대로 문제만 만들어줘:
-[문제: 문제 지문]
 
-1. 첫 번째 보기
-2. 두 번째 보기
-3. 세 번째 보기
-4. 네 번째 보기
 
-[답: 정답 번호. 정답 해설]""", 
-            user_message=text
-        )
-    except Exception as e:
-        raise ValueError(f"요약 생성 중 오류가 발생했습니다: {e}")
-    quiz_list = extract_quiz(quiz_submit)
-    return render(request, 'summary/AI_quizpage.html', quiz_list)
+
+
+
+
+
+
+
+
+
+
+
+
+
+# import re
+# from django.shortcuts import render, get_object_or_404
+# from .models import UploadFile_summary
+
+
+
+
+
+
+
+
+
 
 def extract_quiz(input_text):
-    pattern = r'\[문제: (.*?)\]\n\n(?:1)\. (.*?)\n2\. (.*?)\n3\. (.*?)\n4\. (.*?)\n\n\[답: (\d)\. (.*?)\]'
+    # 패턴 수정: 문제, 보기, 답, 해설을 포함한 정규 표현식
+    pattern = r'\[문제:([^\]]+)\]\s*1\.\s*([^\n]+)\s*2\.\s*([^\n]+)\s*3\.\s*([^\n]+)\s*4\.\s*([^\n]+)\s*\[답: (\d)\.\s*([^\]]+)\]'
 
     # 정규 표현식에 맞춰 패턴 매칭
-    match = re.search(pattern, input_text)
+    match = re.search(pattern, input_text, re.MULTILINE | re.DOTALL)
 
     if match:
-        question = match.group(1)
-        options = [match.group(i) for i in range(2, 6)]
-        answer_number = match.group(6)
-        answer_comment = match.group(7)
-
-        print(f"문제: {question}")
-        # print(question)
-        print("\n객관식:")
-        for i, option in enumerate(options, start=1):
-            print(f"{i}. {option}")
-        print(f"\n정답: {answer_number}")
-        print(f"\n해설: {answer_comment}")
+        question = match.group(1).strip()
+        options = [match.group(i).strip() for i in range(2, 6)]
+        answer_number = match.group(6).strip()
+        answer_comment = match.group(7).strip()
     else:
-        print("문제 형식이 올바르지 않습니다.")
+        # 정규 표현식 매칭 실패 시 기본값 할당
+        question = ""
+        options = ["", "", "", ""]
+        answer_number = ""
+        answer_comment = ""
+        
+    context = {
+        'question': question,
+        'options': options,
+        'answer_number': answer_number,
+        'answer_comment': answer_comment
+    }
 
-        context = {
-            'question': question,
-            'options': options, 
-            'answer_number': answer_number, 
-            'answer_comment': answer_comment
-        }
-
-        return context
+    return context
 
 
-def show_quiz_view(request, file_id):
+
+def show_quiz_view(request, lecture_name, chapter_name, file_id):
     audio_file = get_object_or_404(UploadFile_summary, pk=file_id)
     text = stt(audio_file.file_name.path)  # stt 함수는 정의된 곳에서 가져오기
 
+    # 강의명과 챕터명이 일치하는 LectureChapter 객체를 가져옴
+    chapter = LectureChapter.objects.filter(lecture__title=lecture_name, chapter_name=chapter_name).first()
+
+    # 현재 로그인한 사용자 정보를 가져옴
+    user = request.user
+    lecture_chapters = LectureChapter.objects.filter(user=user).select_related('lecture').order_by('lecture__title')
+
+    # LectureChapter가 없는 경우 404 에러 반환
+    if not chapter:
+        raise Http404("챕터를 찾을 수 없습니다.")
+
+    lectures = []
+    for chapter_obj in lecture_chapters:
+        lecture_title = chapter_obj.lecture.title
+        chapter_name = chapter_obj.chapter_name
+        lecture_url = reverse('user:lecture_detail', kwargs={'lecture_name': lecture_title})
+        chapter_url = reverse('upload:chapter_detail', kwargs={'lecture_name': lecture_title, 'chapter_name': chapter_name})
+
+        # 현재 강의가 lectures 리스트에 없으면 추가
+        if not any(lecture['lecture'] == lecture_title for lecture in lectures):
+           lectures.append({'lecture': lecture_title, 'chapters': []})
+
+        # 현재 챕터 추가
+        lectures[-1]['chapters'].append({'chapter_name': chapter_name, 'chapter_url': chapter_url, 'lecture_url': lecture_url})
+
     if not text:
         raise ValueError("STT 함수에서 텍스트를 반환하지 못했습니다.")
 
     # 요약 생성
     try:
-        quiz_submit = generate_response(
+        quiz_submit = QUIZ_generate_response(
             sys_message="""너는 한국어로 4지선다 객관식 문제를 제공하는 챗봇이야. 다음 형식대로 문제만 만들어줘:
 
-[문제: 문제 지문]
+            [문제: 문제 지문]
 
-1. 첫 번째 보기
-2. 두 번째 보기
-3. 세 번째 보기
-4. 네 번째 보기
+            1. 첫 번째 보기
+            2. 두 번째 보기
+            3. 세 번째 보기
+            4. 네 번째 보기
 
-[답: 정답 번호. 정답 해설]""", 
+            [답: 정답 번호. 정답 해설]""", 
             user_message=text
         )
 
     except Exception as e:
         raise ValueError(f"요약 생성 중 오류가 발생했습니다: {e}")
-        
+
     quiz_list = extract_quiz(quiz_submit)
-    return render(request, 'summary/AI_quizpage.html', quiz_list)
+
+    context = {
+        'chapter': chapter,
+        'lectures': lectures,
+        'quiz_list': quiz_list
+    }
+    return render(request, 'summary/AI_quizpage.html', context)
+
+
+
+def QUIZ_generate_response(sys_message, user_message):
+
+    load_dotenv()  # .env 파일을 로드합니다
+
+    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+
+    client = OpenAI(api_key=OPENAI_API_KEY)
+    model = "gpt-3.5-turbo"
+    
+    messages = [
+        {"role": "system", "content": sys_message},
+        {"role": "user", "content": user_message}
+    ]
+    
+    response = client.chat.completions.create(
+        model=model,
+        messages=messages,
+        temperature=0
+    )
+    
+    response_message = response.choices[0].message.content.strip()
+    # extracted_text = extract_text(response_message)
+    print("response_message : \n", response_message)
+    
+    return response_message
