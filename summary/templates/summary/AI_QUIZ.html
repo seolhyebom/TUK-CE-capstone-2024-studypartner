@@ -21,37 +21,8 @@
             float: right; /* 아이콘을 오른쪽으로 배치 */
         }
 
-        /* 커스터마이즈된 파일 선택 버튼 스타일 */
-        .custom-file-upload {
-            border: 1px solid #cce5ff;
-            display: inline-block;
-            padding: 6px 12px;
-            cursor: pointer;
-            background-color: #ac1aef;
-            color: white;
-            border-radius: 7px;
-            font-size: 13px;
-            text-align: center;
-        }
-
-        /* 파일 선택 버튼과 파일 이름 표시를 수평으로 배치하는 컨테이너 */
-        .file-upload-container {
-            display: flex;
-            align-items: center;
-            gap: 10px; /* 버튼과 텍스트 사이의 간격 */
-        }
-
-        .file-name {
-            color: #cce5ff;
-            font-size: 14px;
-        }
-
-        .form-container {
-            margin-top: 20px;
-        }
-
-        .uploaded_file_list-container {
-            max-height: 120px; /* 최대 높이 설정 */
+        .AI-QUIZ-section-container {
+            max-height: 320px; /* 최대 높이 설정 */
             overflow-y: auto; /* 수직 스크롤 추가 */
             overflow-x: auto; /* 수평 스크롤 추가 */
             /* border: 1px solid #bababa; */
@@ -60,15 +31,15 @@
         }
 
         /* 스크롤바 스타일 */
-        .uploaded_file_list-container::-webkit-scrollbar {
+        .AI-QUIZ-section-container::-webkit-scrollbar {
             width: 7px; /* 스크롤바 너비 */
         }
 
-        .uploaded_file_list-container::-webkit-scrollbar-thumb:hover {
+        .AI-QUIZ-section-container::-webkit-scrollbar-thumb:hover {
             background-color: #b0f2c2; /* hover 시 색상 변경 */
         }
 
-        .uploaded_file_list-container::-webkit-scrollbar-thumb {
+        .AI-QUIZ-section-container::-webkit-scrollbar-thumb {
             background-color: #d8f8e1; /* 스크롤바 색상 */
             border-radius: 4px; /* 스크롤바 둥글게 */
         }
@@ -178,8 +149,8 @@
             <hr style="border-top: 0.8px solid #bababa; width: 100%; margin: 7px 0; margin-bottom: 15px;">
 
             <!-- 퀴즈 섹션 -->
-            <div style="color: white;">
-                <h2 style="font-size: large; margin-bottom: 25px;" class="tip-effect"><b>문제 : {{ quiz_list.question|default:"문제 출제중입니다." }}</b></h2>
+            <div style="color: white;" class="AI-QUIZ-section-container">
+                <h2 style="font-size: large; margin-bottom: 28px;" class="tip-effect"><b>문제 : {{ quiz_list.question|default:"문제 출제중입니다." }}</b></h2>
                 <ul id="quiz-options">
                     {% for option in quiz_list.options %}
                         <li style="padding-bottom: 6px;" class="link-effect" data-answer="{{ quiz_list.answer_number }}" data-option="{{ forloop.counter }}">
@@ -228,11 +199,11 @@
                     notification.innerHTML = '문제가 비어있어 다시 출제 합니다.<br>잠시만 기다려 주세요!';
                     notification.className = 'notification empty';
                     notification.style.display = 'block';
+                    location.reload(); // 페이지 새로고침
 
-                    // 페이지 새로고침
                     setTimeout(() => {
-                        location.reload(); // 페이지 새로고침
-                    }, 10000); // 알림이 10초 후 사라짐
+                        notification.style.display = 'none';  
+                    }, 12000); // 알림이 12초 후 사라짐
                 }
             }
 
