@@ -169,9 +169,7 @@
             line-height: 1.5; /* 줄 높이 */
             margin-bottom: 10px;
         }
-        .hidden {
-            display: none;
-        }
+
     </style>
 </head>
 <body id="body-pd">
@@ -186,10 +184,10 @@
 
     <!-- 사용자의 챕터 상세정보 -->
     <div class="custom-body chrome_font">
-        <div class="lecture-box6 p-3 rounded-lg shadow-md" style="background: darkslategray">
+        <div class="lecture-box6 p-3 rounded-lg shadow-md" style="background: rgb(56, 89, 89)">
             <h2 style="text-align: center;"><br>
                 <span style="color: white;">Study Partner</span>
-                <a href="{% url 'upload:chapter_detail' lecture_name=chapter.lecture.title chapter_name=chapter.chapter_name %}">
+                <a href="{% url 'summary:AI_quizpage' lecture_name=chapter.lecture.title chapter_name=chapter.chapter_name %}">
                     <ion-icon name="arrow-back-outline" class="lecture_urllink2 nav__toggle2 study-partner-backion" id="back-toggle"></ion-icon>
                 </a>
             </h2><br>
@@ -199,47 +197,18 @@
 
                 <p style="color:white"><b>강의 및 챕터명:</b> &nbsp;&nbsp;{{ chapter.lecture.title }} - {{ chapter.chapter_name }}</p><br>
             </div>
-            <hr style="border-top: 0.8px solid #bababa; width: 100%; margin: 7px 0;"><br>
+            <hr style="border-top: 0.8px solid #bababa; width: 100%; margin: 7px 0; margin-bottom: 15px;">
 
-            <!-- Quiz 진행 시 숨김처리 하는 부분 -->
-            <div class="user-box" id="uploaded_file_lists">    
-                <p style="color:white; margin-bottom: 2px;"><b>업로드된 파일 목록:</b> </p>
-                <div class="uploaded_file_list-container">
-                    <ul>
-                        {% for file in uploaded_files %}
-                        <li style="display: flex; justify-content: space-between; align-items: center;">
-                            
-                            <!-- 파일 제목 왼쪽 정렬 -->
-                            <a href="{{ file.file_name.url }}" class="link-effect">
-                                {{ file.file_title }}
-                            </a>
-                            <!-- 다운로드와 삭제 아이콘 오른쪽 정렬 -->
-                            <div>
-                                <a href="{% url 'summary:show_quiz' file_id=file.id lecture_name=chapter.lecture.title chapter_name=chapter.chapter_name %}" class="link-effect2" onclick="startQuiz('{{ file.id }}')">
-                                    Quiz 시작하기
-                                </a>
-                            </div>
-                        </li>
-                        {% endfor %} 
-                    </ul>
-                </div>
-
-                <hr style="border-top: 0.8px solid #bababa; width: 100%; margin: 7px 0; padding-bottom: 12px;">
-                <p class="tip-effect1">TIP1 : 내용을 입력하세요.</p>
-                <p class="tip-effect2">TIP2 : 내용을 입력하세요.</p>
-                <p class="tip-effect3">TIP3 : 내용을 입력하세요.</p>
-
-                <!-- 퀴즈 섹션 -->
-                <div id="quiz_section" class="hidden" style="color: white;">
-                    <h2 id="quiz_question_section" style="padding-bottom: 20px;" class="tip-effect2">문제 : {{ quiz_list.question|default:"문제가 없습니다." }}</h2>
-                    <ul>
-                        {% for option in quiz_list.options %}
-                            <li style="padding-bottom: 6px;">{{ forloop.counter }}. {{ option|default:"보기가 없습니다." }}</li>
-                        {% endfor %}
-                    </ul><br>
-                    <p style="padding-bottom: 3px;">정답 : {{ quiz_list.answer_number|default:"정답이 없습니다." }}</p>
-                    <p>해설 : {{ quiz_list.answer_comment|default:"해설이 없습니다." }}</p>
-                </div>
+            <!-- 퀴즈 섹션 -->
+            <div style="color: white;">
+                <h2 style="font-size: large; margin-bottom: 5px;" class="tip-effect2"><b>문제 : {{ quiz_list.question|default:"문제 출제중입니다." }}</b></h2>
+                <ul>
+                    {% for option in quiz_list.options %}
+                        <li style="padding-bottom: 6px;">{{ forloop.counter }}. {{ option|default:"보기 출제중입니다." }}</li>
+                    {% endfor %}
+                </ul><br>
+                <p style="padding-bottom: 3px;">정답 : {{ quiz_list.answer_number|default:"정답 출제중입니다." }}</p>
+                <p>해설 : {{ quiz_list.answer_comment|default:"해설 출제중입니다." }}</p>
             </div><br>
         </div>
     </div>
@@ -251,16 +220,6 @@
     </div>
     <!-- 친구 시스템 포함할 끝 부분-->
 
-    <script>
-        // "Quiz 시작하기" 버튼 클릭 시 파일 목록을 숨기고 퀴즈를 보여주는 함수
-        function startQuiz(fileId) {
-            // 파일 목록을 숨김 처리
-            document.getElementById('uploaded_file_lists').classList.add('hidden');
-    
-            // 퀴즈 섹션을 표시
-            document.getElementById('quiz_section').classList.remove('hidden');
-        }
-    </script>
 
 </body>
 </html>
