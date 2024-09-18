@@ -882,6 +882,8 @@ def extract_quiz(input_text):
         options = ["", "", "", ""]
         answer_number = ""
         answer_comment = ""
+
+        print("===========\nquestion :", question)
         
     context = {
         'question': question,
@@ -933,9 +935,9 @@ def show_quiz_view(request, lecture_name, chapter_name, file_id):
 
             1. 문제는 항상 질문 형태로 끝나야 하며, `?`로 끝나야 합니다.
             2. 문제는 항상 `.`으로 시작할 수 없습니다.
-            3. 문제는 항상 랜덤으로 출제되어야 합니다.
-            4. 보기는 항상 `.`으로 끝나야 합니다.
-            5. 보기는 항상 `?`으로 끝날 수 없습니다.
+            3. 보기는 항상 `.`으로 끝나야 합니다.
+            4. 보기는 항상 `?`으로 끝날 수 없습니다.
+            5. 답은 `?`으로 끝날 수 없습니다.
 
             형식:
             [문제: 문제 지문?]
