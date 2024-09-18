@@ -9,6 +9,7 @@
     <title>{{ chapter.lecture.title }} {{ chapter.chapter_name }} - Quiz 페이지</title>
 
     <style>
+        /* 기존 스타일은 그대로 유지 */
         .back-icon {
             font-size: 1.1rem; /* 아이콘 크기 조정 */
             color: #000; /* 아이콘 색상 조정 */
@@ -84,22 +85,14 @@
             margin-right: 2px;
         }
         .link-effect {
-            color: #24d1f0;
+            color: #e0f7fa;
             text-decoration: none;
             font-size: 16px;
             font-weight: bold;
             position: relative;
             overflow: hidden;
             transition: color 0.3s ease;
-        }
-        .link-effect2 {
-            color: #e8ef6e;
-            text-decoration: none;
-            font-size: 16px;
-            font-weight: bold;
-            position: relative;
-            overflow: hidden !important;
-            transition: color 0.3s ease;
+            display: inline-block; /* 링크의 크기만큼만 표시되도록 설정 */
         }
         .link-effect::after {
             content: "";
@@ -108,46 +101,17 @@
             bottom: 0;
             width: 100%;
             height: 2px;
-            background: #60bffe; /* 텍스트 색상과 동일 */
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-        }
-        .link-effect2::after {
-            content: "";
-            position: relative;
-            left: 0;
-            bottom: 0;
-            width: 100%;
-            height: 2px;
-            background: #e3ec38; /* 텍스트 색상과 동일 */
+            background: #80deea; /* 텍스트 색상과 동일 */
             transform: translateX(-100%);
             transition: transform 0.3s ease;
         }
         .link-effect:hover {
-            color: #2eed71; /* 텍스트 hover 색상 */
+            color: #00acc1; /* 텍스트 hover 색상 */
         }
-        .link-effect2:hover {
-            color: #fe8b07; /* 텍스트 hover 색상 */
-        }
-
         .link-effect:hover::after {
             transform: translateX(0);
         }
-        .link-effect3:hover::after {
-            transform: translateX(0);
-        }
-        .tip-effect1 {
-            color: #333; /* 기본 글씨 색상 */
-            padding: 5px; /* 충분한 여백 */
-            margin: 7px 0; /* 위아래 여백 */
-            background-color: #f9f9f9; /* 부드러운 회색 배경 */
-            border-left: 5px solid #007bff; /* 왼쪽에 강조를 위한 색상 있는 테두리 */
-            border-radius: 10px; /* 모서리를 둥글게 */
-            font-size: 13.5px; /* 폰트 크기 */
-            line-height: 1.5; /* 줄 높이 */
-            margin-bottom: 10px;
-        }
-        .tip-effect2 {
+        .tip-effect {
             color: #333; /* 기본 글씨 색상 */
             padding: 5px; /* 충분한 여백 */
             margin: 7px 0; /* 위아래 여백 */
@@ -158,18 +122,33 @@
             line-height: 1.5; /* 줄 높이 */
             margin-bottom: 10px;
         }
-        .tip-effect3 {
-            color: #333; /* 기본 글씨 색상 */
-            padding: 5px; /* 충분한 여백 */
-            margin: 7px 0; /* 위아래 여백 */
-            background-color: #f9f9f9; /* 부드러운 회색 배경 */
-            border-left: 5px solid #08ff14; /* 왼쪽에 강조를 위한 색상 있는 테두리 */
-            border-radius: 10px; /* 모서리를 둥글게 */
-            font-size: 13.5px; /* 폰트 크기 */
-            line-height: 1.5; /* 줄 높이 */
-            margin-bottom: 10px;
+
+        /* 알림 스타일 */
+        .notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #000;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none; /* 초기에는 숨김 */
+            z-index: 1000;
+            text-align: center;
         }
 
+        .notification.correct {
+            background-color: #4CAF50; /* 초록색 - 정답 */
+        }
+
+        .notification.incorrect {
+            background-color: #F44336; /* 빨간색 - 오답 */
+        }
+
+        .notification.empty {
+            background-color: #FF9800; /* 주황색 - 비어있는 문제 */
+        }
     </style>
 </head>
 <body id="body-pd">
@@ -194,21 +173,22 @@
 
             <div class="user-box">
                 <p style="color:white"><b>사용자:</b> &nbsp;&nbsp;{{ user.username }} 님</p>
-
                 <p style="color:white"><b>강의 및 챕터명:</b> &nbsp;&nbsp;{{ chapter.lecture.title }} - {{ chapter.chapter_name }}</p><br>
             </div>
             <hr style="border-top: 0.8px solid #bababa; width: 100%; margin: 7px 0; margin-bottom: 15px;">
 
             <!-- 퀴즈 섹션 -->
             <div style="color: white;">
-                <h2 style="font-size: large; margin-bottom: 5px;" class="tip-effect2"><b>문제 : {{ quiz_list.question|default:"문제 출제중입니다." }}</b></h2>
-                <ul>
+                <h2 style="font-size: large; margin-bottom: 25px;" class="tip-effect"><b>문제 : {{ quiz_list.question|default:"문제 출제중입니다." }}</b></h2>
+                <ul id="quiz-options">
                     {% for option in quiz_list.options %}
-                        <li style="padding-bottom: 6px;">{{ forloop.counter }}. {{ option|default:"보기 출제중입니다." }}</li>
+                        <li style="padding-bottom: 6px;" class="link-effect" data-answer="{{ quiz_list.answer_number }}" data-option="{{ forloop.counter }}">
+                            {{ forloop.counter }}. {{ option|default:"보기 출제중입니다." }}
+                        </li>
                     {% endfor %}
                 </ul><br>
-                <p style="padding-bottom: 3px;">정답 : {{ quiz_list.answer_number|default:"정답 출제중입니다." }}</p>
-                <p>해설 : {{ quiz_list.answer_comment|default:"해설 출제중입니다." }}</p>
+                <p id="answer" style="display: none;">정답 : {{ quiz_list.answer_number|default:"정답 출제중입니다." }}</p>
+                <p id="comment" style="display: none;">해설 : {{ quiz_list.answer_comment|default:"해설 출제중입니다." }}</p>
             </div><br>
         </div>
     </div>
@@ -220,6 +200,70 @@
     </div>
     <!-- 친구 시스템 포함할 끝 부분-->
 
+    <!-- 알림창 -->
+    <div id="notification" class="notification"></div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const options = document.querySelectorAll('.link-effect');
+            const notification = document.getElementById('notification');
+            const answerParagraph = document.getElementById('answer');
+            const commentParagraph = document.getElementById('comment');
+            const quizOptions = document.getElementById('quiz-options');
+            const questionHeading = document.querySelector('h2');
+
+            // 문제나 보기가 비어있는지 체크
+            function checkEmptyFields() {
+                const question = questionHeading.textContent;
+                const optionsList = quizOptions.querySelectorAll('li');
+                
+                if (question.includes('문제 출제중입니다.') || optionsList.length === 0 || Array.from(optionsList).some(option => option.textContent.includes('보기 출제중입니다.'))) {
+                    // 문제와 보기 숨김 처리
+                    questionHeading.style.display = 'none';
+                    quizOptions.style.display = 'none';
+                    answerParagraph.style.display = 'none';
+                    commentParagraph.style.display = 'none';
+
+                    // 알림창 설정 및 표시
+                    notification.innerHTML = '문제가 비어있어 다시 출제 합니다.<br>잠시만 기다려 주세요!';
+                    notification.className = 'notification empty';
+                    notification.style.display = 'block';
+
+                    // 페이지 새로고침
+                    setTimeout(() => {
+                        location.reload(); // 페이지 새로고침
+                    }, 10000); // 알림이 10초 후 사라짐
+                }
+            }
+
+            // 페이지 로드 시 비어있는지 체크
+            checkEmptyFields();
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    const selectedOption = parseInt(this.getAttribute('data-option'));
+                    const correctAnswer = parseInt(this.getAttribute('data-answer'));
+
+                    // 알림창의 내용과 클래스 설정
+                    if (selectedOption === correctAnswer) {
+                        notification.innerHTML = '정답입니다.<br>아래의 정답과 해설을 참고하세요!';
+                        notification.className = 'notification correct';
+                        answerParagraph.style.display = 'block';
+                        commentParagraph.style.display = 'block';
+                    } else {
+                        notification.innerHTML = '오답입니다.<br>다시 한 번 문제를 풀어보세요!';
+                        notification.className = 'notification incorrect';
+                        answerParagraph.style.display = 'none';
+                        commentParagraph.style.display = 'none';
+                    }
+
+                    notification.style.display = 'block';
+                    setTimeout(() => {
+                        notification.style.display = 'none';
+                    }, 2500); // 알림이 2.5초 후 사라짐
+                });
+            });
+        });
+    </script>
 </body>
 </html>
