@@ -768,3 +768,6 @@ def get_file_size(request, file_id):
         })
     except UploadFile_summary.DoesNotExist:
         return JsonResponse({'error': '파일을 찾을 수 없습니다.'}, status=404)
+
+
+
