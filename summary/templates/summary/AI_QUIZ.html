@@ -196,14 +196,27 @@
                     commentParagraph.style.display = 'none';
 
                     // 알림창 설정 및 표시
-                    notification.innerHTML = '문제가 비어있어 다시 출제 합니다.<br>잠시만 기다려 주세요!';
+                    notification.innerHTML = '문제가 유효하지 않아 다시 출제 합니다.<br>잠시만 기다려 주세요!';
                     notification.className = 'notification empty';
                     notification.style.display = 'block';
                     location.reload(); // 페이지 새로고침
 
+                    // 첫 번째 메시지 표시
+                    notification.style.display = 'block';
+
+                    setTimeout(() => {
+                        // 두 번째 메시지
+                        notification.innerHTML = '문제 출제 중입니다.<br>잠시만 기다려 주세요...';
+                    }, 6000); // 6초 후 변경
+
+                    setTimeout(() => {
+                        // 세 번째 메시지
+                        notification.innerHTML = '곧 문제를 다시 출제합니다.';
+                    }, 12000); // 12초 후 변경
+
                     setTimeout(() => {
                         notification.style.display = 'none';  
-                    }, 12000); // 알림이 12초 후 사라짐
+                    }, 18000); // 알림이 18초 후 사라짐
                 }
             }
 

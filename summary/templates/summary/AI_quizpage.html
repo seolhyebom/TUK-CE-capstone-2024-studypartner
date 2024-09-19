@@ -172,6 +172,20 @@
         .hidden {
             display: none;
         }
+        /* 퀴즈시작 알림 스타일 */
+        #quiz-start-alert {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center; /* 텍스트 중앙 정렬 */
+            z-index: 1000;
+        }
     </style>
 </head>
 <body id="body-pd">
@@ -251,16 +265,44 @@
     </div>
     <!-- 친구 시스템 포함할 끝 부분-->
 
+    <!-- 퀴즈시작 알림 -->
+    <div id="quiz-start-alert">AI가 퀴즈 생성중입니다.<br>잠시만 기다려주세요.</div>
+
     <script>
         // "Quiz 시작하기" 버튼 클릭 시 파일 목록을 숨기고 퀴즈를 보여주는 함수
         function startQuiz(fileId) {
             // 파일 목록을 숨김 처리
             document.getElementById('uploaded_file_lists').classList.add('hidden');
+        
+            // 퀴즈 시작 알림을 보여줌
+            var alertElement = document.getElementById('quiz-start-alert');
+            alertElement.innerHTML = "AI가 퀴즈 생성중입니다.<br>잠시만 기다려주세요."; // 초기 메시지
+            alertElement.style.display = 'block';
+        
+            // 5.5초 후 첫 번째 메시지 변경
+            setTimeout(function() {
+                alertElement.innerHTML = "페이지 이동 또는 새로고침 시<br>작업을 다시 수행해야 할 수 있습니다."; // 첫 번째 새로운 메시지
+            }, 5500); // 5.5초 후 변경
     
+            // 11초 후 두 번째 메시지로 변경
+            setTimeout(function() {
+                alertElement.innerHTML = "퀴즈 생성이 거의 완료되었습니다.<br>잠시만 기다려주세요."; // 두 번째 새로운 메시지
+            }, 11000); // 11초 후 변경
+
+            // 16초 후 두 번째 메시지로 변경
+            setTimeout(function() {
+                alertElement.innerHTML = "페이지 이동 중입니다.<br>잠시만 기다려주세요."; // 두 번째 새로운 메시지
+            }, 16000); // 16초 후 변경
+
+            setTimeout(() => {
+                        notification.style.display = 'none';  
+                    }, 20000); // 알림이 20초 후 사라짐
+        
             // 퀴즈 섹션을 표시
             document.getElementById('quiz_section').classList.remove('hidden');
         }
     </script>
+    
 
 </body>
 </html>
