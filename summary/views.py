@@ -920,10 +920,55 @@ def show_quiz_view(request, lecture_name, chapter_name, file_id):
 
         # 현재 강의가 lectures 리스트에 없으면 추가
         if not any(lecture['lecture'] == lecture_title for lecture in lectures):
-           lectures.append({'lecture': lecture_title, 'chapters': []})
+            lectures.append({'lecture': lecture_title, 'chapters': []})
 
         # 현재 챕터 추가
         lectures[-1]['chapters'].append({'chapter_name': chapter_name, 'chapter_url': chapter_url, 'lecture_url': lecture_url})
+
+    # 현재 사용자의 친구 요청 가져오기
+    friend_requests = FriendRequest.objects.filter(to_user=request.user)
+
+    # 현재 사용자의 친구 목록 가져오기
+    user = request.user
+    friends = Friendship.objects.filter(user=user).select_related('friend')
+
+    # 오늘의 날짜 범위 계산
+    user_timezone = pytz.timezone('Asia/Seoul')  # 사용자의 시간대로 설정
+    today = timezone.now().astimezone(user_timezone).date()
+    start_of_day = timezone.make_aware(datetime.combine(today, datetime.min.time()))
+    end_of_day = start_of_day + timedelta(days=1)
+
+    # 현재 사용자의 모든 공부 세션 가져오기 (날짜 역순 정렬)
+    sessions = Study_TimerSession.objects.filter(user=request.user).order_by('-date')
+
+    # 기록을 timedelta 형식으로 변환
+    for session in sessions:
+        session.records = convert_to_timedelta(session.records)
+
+    # 오늘의 기록 가져오기 (가장 높은 기록)
+    today_sessions = sessions.filter(date__date=today)
+    today_record_value = None
+    today_record = None  # today_record 변수를 미리 정의
+    if today_sessions:
+        today_record = max(today_sessions, key=lambda session: session.records)
+        today_record_value = convert_to_timedelta(today_record.records)  # timedelta로 변환
+
+    # 친구들의 오늘의 공부 기록 가져오기
+    friends_records = []
+    for friendship in friends:
+        friend = friendship.friend
+        friend_today_sessions = Study_TimerSession.objects.filter(user=friend, date__range=(start_of_day, end_of_day))
+
+        if friend_today_sessions:
+            best_record = max(friend_today_sessions, key=lambda session: session.records)
+            friends_records.append((friend.username, convert_to_timedelta(best_record.records)))
+
+    # 나의 기록을 friends_records에 추가
+    if today_record_value:
+        friends_records.append((user.username, today_record_value))
+
+    # 기록을 기준으로 내림차순 정렬
+    friends_records.sort(key=lambda x: x[1], reverse=True)
 
     if not text:
         raise ValueError("STT 함수에서 텍스트를 반환하지 못했습니다.")
