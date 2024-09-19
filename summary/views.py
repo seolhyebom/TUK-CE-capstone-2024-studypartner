@@ -1004,7 +1004,15 @@ def show_quiz_view(request, lecture_name, chapter_name, file_id):
     context = {
         'chapter': chapter,
         'lectures': lectures,
-        'quiz_list': quiz_list
+        'quiz_list': quiz_list,
+        'audio_file': audio_file,
+        'chapter_name': chapter_name,
+        'request_user': user,
+        'friend_requests': friend_requests,
+        'friends': friends,
+        'today_record': today_record,
+        'friends_records': friends_records,
+        'text': text,
     }
     return render(request, 'summary/AI_QUIZ.html', context)
 
